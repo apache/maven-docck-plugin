@@ -30,6 +30,7 @@ public class InfoDocumentationReport
         super( message );
     }
 
+    @Override
     public int getType()
     {
         return DocumentationReport.TYPE_INFO;

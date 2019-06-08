@@ -59,6 +59,7 @@ public class CheckPluginDocumentationMojo
     // TODO: really a description of length 1 isn't all that helpful...
     private static final int MIN_DESCRIPTION_LENGTH = 1;
 
+    @Override
     protected void checkPackagingSpecificDocumentation( MavenProject project, DocumentationReporter reporter )
     {
         PluginDescriptor descriptor = new PluginDescriptor();
@@ -125,6 +126,7 @@ public class CheckPluginDocumentationMojo
         checkProjectSite( project, reporter );
     }
 
+    @Override
     protected boolean approveProjectPackaging( String packaging )
     {
         return "maven-plugin".equals( packaging );
@@ -143,15 +145,10 @@ public class CheckPluginDocumentationMojo
         }
         else
         {
-            Reader streamReader = null;
-            try
+            
+            try ( Reader streamReader = ReaderFactory.newXmlReader( siteXml ) )
             {
-                streamReader = ReaderFactory.newXmlReader( siteXml );
-
                 String siteHtml = IOUtil.toString( streamReader );
-
-                streamReader.close();
-                streamReader = null;
 
                 if ( !siteHtml.contains( "href=\"index.html\"" ) )
                 {
@@ -177,10 +174,6 @@ public class CheckPluginDocumentationMojo
             {
                 reporter.error( "Unable to read site.xml file: \'" + siteXml.getAbsolutePath() + "\'.\nError: "
                     + e.getMessage() );
-            }
-            finally
-            {
-                IOUtil.close( streamReader );
             }
         }
 
@@ -248,7 +241,7 @@ public class CheckPluginDocumentationMojo
      */
     private List<String> getRequiredPlugins()
     {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         list.add( "maven-javadoc-plugin" );
         list.add( "maven-jxr-plugin" );

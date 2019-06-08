@@ -30,6 +30,7 @@ public class ErrorDocumentationReport
         super( message );
     }
 
+    @Override
     public int getType()
     {
         return DocumentationReport.TYPE_ERROR;

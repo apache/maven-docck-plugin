@@ -27,7 +27,7 @@ import java.util.ArrayList;
  */
 public class DocumentationReporter
 {
-    private List<DocumentationReport> reports = new ArrayList<DocumentationReport>();
+    private List<DocumentationReport> reports = new ArrayList<>();
 
     public void info( String message )
     {
@@ -46,7 +46,7 @@ public class DocumentationReporter
 
     public List<String> getMessagesByType( int type )
     {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         for ( DocumentationReport report : reports )
         {
@@ -61,7 +61,7 @@ public class DocumentationReporter
 
     public List<String> getMessages()
     {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         for ( DocumentationReport report : reports )
         {

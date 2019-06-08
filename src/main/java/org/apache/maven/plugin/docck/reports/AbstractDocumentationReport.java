@@ -32,6 +32,7 @@ public abstract class AbstractDocumentationReport
         this.message = message;
     }
 
+    @Override
     public String getMessage()
     {
         return message;

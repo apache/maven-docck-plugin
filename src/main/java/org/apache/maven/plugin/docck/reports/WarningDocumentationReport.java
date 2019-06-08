@@ -30,6 +30,7 @@ public class WarningDocumentationReport
         super( message );
     }
 
+    @Override
     public int getType()
     {
         return DocumentationReport.TYPE_WARN;

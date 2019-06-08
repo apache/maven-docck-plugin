@@ -42,7 +42,6 @@ import org.apache.maven.settings.Proxy;
 import org.apache.maven.settings.Settings;
 import org.apache.maven.shared.model.fileset.FileSet;
 import org.apache.maven.shared.model.fileset.util.FileSetManager;
-import org.codehaus.plexus.util.IOUtil;
 import org.codehaus.plexus.util.StringUtils;
 
 import java.io.File;
@@ -103,7 +102,7 @@ public abstract class AbstractCheckDocumentationMojo
 
     private FileSetManager fileSetManager = new FileSetManager();
 
-    private List<String> validUrls = new ArrayList<String>();
+    private List<String> validUrls = new ArrayList<>();
 
     protected AbstractCheckDocumentationMojo()
     {
@@ -122,6 +121,7 @@ public abstract class AbstractCheckDocumentationMojo
         return reactorProjects;
     }
 
+    @Override
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
@@ -132,7 +132,7 @@ public abstract class AbstractCheckDocumentationMojo
             getLog().info( "Writing documentation check results to: " + output );
         }
 
-        Map<MavenProject, DocumentationReporter> reporters = new LinkedHashMap<MavenProject, DocumentationReporter>();
+        Map<MavenProject, DocumentationReporter> reporters = new LinkedHashMap<>();
         boolean hasErrors = false;
 
         for ( MavenProject project : reactorProjects )
@@ -240,7 +240,7 @@ public abstract class AbstractCheckDocumentationMojo
 
             if ( !reporter.getMessages().isEmpty() )
             {
-                buffer.append( "\no " ).append( project.getName() );
+                buffer.append( System.lineSeparator() ).append( "o " ).append( project.getName() );
                 buffer.append( " (" );
                 final int numberOfErrors = reporter.getMessagesByType( DocumentationReport.TYPE_ERROR ).size();
                 buffer.append( numberOfErrors ).append( " error" ).append( numberOfErrors == 1 ? "" : "s" );
@@ -248,18 +248,18 @@ public abstract class AbstractCheckDocumentationMojo
                 final int numberOfWarnings = reporter.getMessagesByType( DocumentationReport.TYPE_WARN ).size();
                 buffer.append( numberOfWarnings ).append( " warning" ).append( numberOfWarnings == 1 ? "" : "s" );
                 buffer.append( ")" );
-                buffer.append( "\n" );
+                buffer.append( System.lineSeparator() );
 
                 for ( String error : reporter.getMessages() )
                 {
-                    buffer.append( "  " ).append( error ).append( "\n" );
+                    buffer.append( "  " ).append( error ).append( System.lineSeparator() );
                 }
             }
         }
 
         if ( buffer.length() > 0 )
         {
-            messages = "The following documentation problems were found:\n" + buffer.toString();
+            messages = "The following documentation problems were found:" + System.lineSeparator() + buffer.toString();
         }
 
         return messages;
@@ -279,18 +279,9 @@ public abstract class AbstractCheckDocumentationMojo
     {
         if ( output != null )
         {
-            FileWriter writer = null;
-
-            try
+            try ( FileWriter writer = new FileWriter( output ) )
             {
-                writer = new FileWriter( output );
                 writer.write( messages );
-                writer.close();
-                writer = null;
-            }
-            finally
-            {
-                IOUtil.close( writer );
             }
         }
         else

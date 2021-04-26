@@ -99,9 +99,9 @@ under the License.
       <scope>provided</scope>
     </dependency>
     <dependency>
-      <groupId>commons-httpclient</groupId>
-      <artifactId>commons-httpclient</artifactId>
-      <version>3.1</version>
+      <groupId>org.apache.httpcomponents.client5</groupId>
+      <artifactId>httpclient5</artifactId>
+      <version>5.0.3</version>
     </dependency>
     <dependency>
       <groupId>commons-logging</groupId>

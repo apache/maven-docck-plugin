@@ -19,13 +19,20 @@ package org.apache.maven.plugin.docck;
  * under the License.
  */
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.HttpException;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.HeadMethod;
-import org.apache.commons.httpclient.params.HttpMethodParams;
+import org.apache.hc.client5.http.auth.AuthScope;
+import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.StandardCookieSpec;
+import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpResponse;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.message.BasicHeader;
+import org.apache.hc.core5.util.Timeout;
 import org.apache.maven.model.IssueManagement;
 import org.apache.maven.model.License;
 import org.apache.maven.model.Organization;
@@ -98,23 +105,11 @@ public abstract class AbstractCheckDocumentationMojo
     @Parameter( defaultValue = "${settings}", readonly = true, required = true )
     private Settings settings;
 
-    private HttpClient httpClient;
+    private CloseableHttpClient httpClient;
 
     private FileSetManager fileSetManager = new FileSetManager();
 
     private List<String> validUrls = new ArrayList<>();
-
-    protected AbstractCheckDocumentationMojo()
-    {
-        String httpUserAgent = "maven-docck-plugin/1.x" + " (Java " + System.getProperty( "java.version" ) + "; "
-                + System.getProperty( "os.name" ) + " " + System.getProperty( "os.version" ) + ")";
-
-        httpClient = new HttpClient();
-
-        final int connectionTimeout = 5000;
-        httpClient.getHttpConnectionManager().getParams().setConnectionTimeout( connectionTimeout );
-        httpClient.getParams().setParameter( HttpMethodParams.USER_AGENT, httpUserAgent );
-    }
 
     protected List<MavenProject> getReactorProjects()
     {
@@ -125,7 +120,20 @@ public abstract class AbstractCheckDocumentationMojo
     public void execute()
         throws MojoExecutionException, MojoFailureException
     {
-        setupProxy();
+
+        String httpUserAgent = "maven-docck-plugin/1.x" + " (Java " + System.getProperty( "java.version" ) + "; "
+                + System.getProperty( "os.name" ) + " " + System.getProperty( "os.version" ) + ")";
+        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+              .setDefaultRequestConfig( RequestConfig.custom()
+                      .setConnectTimeout( Timeout.ofSeconds( 5 ) )
+                      .setResponseTimeout( Timeout.ofSeconds( 5 ) )
+                      .setCookieSpec( StandardCookieSpec.STRICT )
+                      .build() )
+              .setDefaultHeaders( List.of( new BasicHeader( HttpHeaders.USER_AGENT, httpUserAgent ) ) );
+
+        setupProxy( httpClientBuilder );
+
+        httpClient = httpClientBuilder.build();
 
         if ( output != null )
         {
@@ -194,8 +202,9 @@ public abstract class AbstractCheckDocumentationMojo
 
     /**
      * Setup proxy access if needed.
+     * @param httpClientBuilder 
      */
-    private void setupProxy()
+    private void setupProxy( HttpClientBuilder httpClientBuilder )
     {
         Proxy settingsProxy = settings.getActiveProxy();
 
@@ -211,7 +220,7 @@ public abstract class AbstractCheckDocumentationMojo
 
             if ( StringUtils.isNotEmpty( proxyHost ) )
             {
-                httpClient.getHostConfiguration().setProxy( proxyHost, proxyPort );
+                httpClientBuilder.setProxy( new HttpHost( proxyHost, proxyPort ) );
 
                 getLog().info( "Using proxy [" + proxyHost + "] at port [" + proxyPort + "]." );
 
@@ -219,10 +228,12 @@ public abstract class AbstractCheckDocumentationMojo
                 {
                     getLog().info( "Using proxy user [" + proxyUsername + "]." );
 
-                    Credentials creds = new UsernamePasswordCredentials( proxyUsername, proxyPassword );
+                    BasicCredentialsProvider credsProvider = new BasicCredentialsProvider();
+                    credsProvider.setCredentials(
+                            new AuthScope( proxyHost, proxyPort ),
+                            new UsernamePasswordCredentials( proxyUsername, proxyPassword.toCharArray() ) );
 
-                    httpClient.getState().setProxyCredentials( new AuthScope( proxyHost, proxyPort ), creds );
-                    httpClient.getParams().setAuthenticationPreemptive( true );
+                    httpClientBuilder.setDefaultCredentialsProvider( credsProvider );
                 }
             }
         }
@@ -465,14 +476,12 @@ public abstract class AbstractCheckDocumentationMojo
                 }
                 else if ( !validUrls.contains( url ) )
                 {
-                    HeadMethod headMethod = new HeadMethod( url );
-                    headMethod.setFollowRedirects( true );
-                    headMethod.setDoAuthentication( false );
+                    HttpHead headMethod = new HttpHead( url );
 
-                    try
+                    try ( CloseableHttpResponse response = httpClient.execute( headMethod ) )
                     {
                         getLog().debug( "Verifying http url: " + url );
-                        if ( httpClient.executeMethod( headMethod ) != HTTP_STATUS_200 )
+                        if ( response.getCode() != HTTP_STATUS_200 )
                         {
                             reporter.error( "Cannot reach " + description + " with URL: \'" + url + "\'." );
                         }
@@ -481,19 +490,10 @@ public abstract class AbstractCheckDocumentationMojo
                             validUrls.add( url );
                         }
                     }
-                    catch ( HttpException e )
-                    {
-                        reporter.error( "Cannot reach " + description + " with URL: \'" + url + "\'.\nError: "
-                            + e.getMessage() );
-                    }
                     catch ( IOException e )
                     {
                         reporter.error( "Cannot reach " + description + " with URL: \'" + url + "\'.\nError: "
                             + e.getMessage() );
-                    }
-                    finally
-                    {
-                        headMethod.releaseConnection();
                     }
                 }
             }

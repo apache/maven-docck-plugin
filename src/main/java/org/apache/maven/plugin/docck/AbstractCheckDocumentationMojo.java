@@ -61,6 +61,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonList;
+
 /**
  * Performs the heavy lifting for documentation checks. This is designed to be
  * reused for other types of projects, too.
@@ -129,7 +131,7 @@ public abstract class AbstractCheckDocumentationMojo
                       .setResponseTimeout( Timeout.ofSeconds( 5 ) )
                       .setCookieSpec( StandardCookieSpec.STRICT )
                       .build() )
-              .setDefaultHeaders( List.of( new BasicHeader( HttpHeaders.USER_AGENT, httpUserAgent ) ) );
+              .setDefaultHeaders( singletonList( new BasicHeader( HttpHeaders.USER_AGENT, httpUserAgent ) ) );
 
         setupProxy( httpClientBuilder );
 

@@ -88,8 +88,6 @@ public abstract class AbstractCheckDocumentationMojo
 
     /**
      * Directory where the site source for the project is located.
-     *
-     * @todo should be determined programmatically
      */
     @Parameter( property = "siteDirectory", defaultValue = "src/site" )
     protected String siteDirectory;

@@ -29,6 +29,8 @@ import org.apache.maven.plugins.annotations.Component;
 import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.project.MavenProject;
+import org.apache.maven.tools.plugin.DefaultPluginToolsRequest;
+import org.apache.maven.tools.plugin.PluginToolsRequest;
 import org.apache.maven.tools.plugin.extractor.ExtractionException;
 import org.apache.maven.tools.plugin.scanner.MojoScanner;
 import org.codehaus.plexus.util.IOUtil;
@@ -66,7 +68,8 @@ public class CheckPluginDocumentationMojo
 
         try
         {
-            mojoScanner.populatePluginDescriptor( project, descriptor );
+            DefaultPluginToolsRequest request = new DefaultPluginToolsRequest( project, descriptor );
+            mojoScanner.populatePluginDescriptor( request );
         }
         catch ( InvalidPluginDescriptorException e )
         {

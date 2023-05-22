@@ -218,13 +218,13 @@ public abstract class AbstractCheckDocumentationMojo
 
             int proxyPort = settingsProxy.getPort();
 
-            if ( StringUtils.isNotEmpty( proxyHost ) )
+            if ( proxyHost != null && !proxyHost.isEmpty() )
             {
                 httpClientBuilder.setProxy( new HttpHost( proxyHost, proxyPort ) );
 
                 getLog().info( "Using proxy [" + proxyHost + "] at port [" + proxyPort + "]." );
 
-                if ( StringUtils.isNotEmpty( proxyUsername ) )
+                if ( proxyUsername != null && !proxyUsername.isEmpty() )
                 {
                     getLog().info( "Using proxy user [" + proxyUsername + "]." );
 
@@ -434,7 +434,7 @@ public abstract class AbstractCheckDocumentationMojo
                 else
                 {
                     String url = license.getUrl();
-                    if ( StringUtils.isEmpty( url ) )
+                    if ( url == null || url.isEmpty() )
                     {
                         reporter.error( "pom.xml is missing the <licenses>/<license>/<url> tag for the license \'"
                             + license.getName() + "\'." );

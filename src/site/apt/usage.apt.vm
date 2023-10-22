@@ -27,6 +27,8 @@
 
 Usage
 
+<<<Note:>>> This plugin is retired. It is no longer maintained.
+
   This document is intended to provide instructions for using the
   Maven DOCCK Plugin. In order for this discussion to be useful, it's
   critical to cover two topics: Configuring your project's <<<pom.xml>>> to run

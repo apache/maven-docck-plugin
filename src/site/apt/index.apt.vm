@@ -28,6 +28,8 @@
 
 ${project.name}
 
+<<<Note:>>> This plugin is retired. It is no longer maintained.
+
   This plugin checks that a project complies with the
   {{{http://maven.apache.org/guides/development/guide-plugin-documentation.html}Plugin Documentation Standard}}.
 

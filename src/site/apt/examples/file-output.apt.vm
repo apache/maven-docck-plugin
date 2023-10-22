@@ -27,6 +27,8 @@
 
 Sending the output to a file
 
+<<<Note:>>> This plugin is retired. It is no longer maintained.
+
 * Configuring your <<<pom.xml>>>
 
   You can use the following configuration in your <<<pom.xml>>> to run the DOCCK

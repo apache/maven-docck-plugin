@@ -30,10 +30,10 @@ under the License.
   </parent>
 
   <artifactId>maven-docck-plugin</artifactId>
-  <version>3.0.0-SNAPSHOT</version>
+  <version>1.2-SNAPSHOT</version>
   <packaging>maven-plugin</packaging>
 
-  <name>Apache Maven Documentation Checker Plugin</name>
+  <name>(RETIRED) Apache Maven Documentation Checker Plugin</name>
   <description>Checks for violations of the Plugin Documentation Standard.</description>
 
   <prerequisites>
@@ -52,7 +52,7 @@ under the License.
   </issueManagement>
   <ciManagement>
     <system>Jenkins</system>
-    <url>https://ci-builds.apache.org/job/Maven/job/maven-box/job/maven-docck-plugin/</url>
+    <url>https://ci-maven.apache.org/job/Maven/job/maven-box/job/maven-docck-plugin/</url>
   </ciManagement>
   <distributionManagement>
     <site>
